@@ -1,0 +1,275 @@
+apiVersion: operators.coreos.com/v1alpha1
+kind: ClusterServiceVersion
+metadata:
+  annotations:
+    alm-examples: |-
+      [
+        {
+          "apiVersion": "config.nri/v1alpha1",
+          "kind": "NriPluginDeployment",
+          "metadata": {
+            "labels": {
+              "app.kubernetes.io/created-by": "nri-plugins-operator",
+              "app.kubernetes.io/instance": "nriplugindeployment-sample",
+              "app.kubernetes.io/managed-by": "kustomize",
+              "app.kubernetes.io/name": "nriplugindeployment",
+              "app.kubernetes.io/part-of": "nri-plugins-operator"
+            },
+            "name": "nriplugindeployment-sample",
+            "namespace": "kube-system"
+          },
+          "spec": {
+            "pluginName": "topology-aware",
+            "pluginVersion": "v0.2.3",
+            "state": "present",
+            "values": {
+              "nri": {
+                "patchRuntimeConfig": true
+              }
+            }
+          }
+        }
+      ]
+    capabilities: Basic Install
+    createdAt: "2023-12-07T09:14:01Z"
+    operators.operatorframework.io/builder: operator-sdk-v1.32.0
+    operators.operatorframework.io/project_layout: ansible.sdk.operatorframework.io/v1
+  name: nri-plugins-operator.v0.0.1
+  namespace: placeholder
+spec:
+  apiservicedefinitions: {}
+  customresourcedefinitions:
+    owned:
+    - kind: NriPluginDeployment
+      name: nriplugindeployments.config.nri
+      version: v1alpha1
+  description: The nri-plugins-operator deploys community maintained nri-plugins into
+    a Kubernetes cluster
+  displayName: nri-plugins-operator
+  icon:
+  - base64data: ""
+    mediatype: ""
+  install:
+    spec:
+      clusterPermissions:
+      - rules:
+        - apiGroups:
+          - config.nri
+          resources:
+          - nriplugindeployments
+          verbs:
+          - get
+          - list
+          - watch
+          - update
+        - apiGroups:
+          - config.nri
+          resources:
+          - nriplugindeployments/status
+          verbs:
+          - get
+          - update
+          - patch
+        - apiGroups:
+          - apiextensions.k8s.io
+          resources:
+          - customresourcedefinitions
+          verbs:
+          - create
+          - delete
+          - get
+          - list
+          - patch
+          - update
+          - watch
+        - apiGroups:
+          - rbac.authorization.k8s.io
+          - apps
+          - ""
+          resources:
+          - clusterrolebindings
+          - clusterroles
+          - rolebindings
+          - roles
+          - daemonsets
+          - configmaps
+          - serviceaccounts
+          - namespaces
+          - secrets
+          verbs:
+          - '*'
+        - apiGroups:
+          - authentication.k8s.io
+          resources:
+          - tokenreviews
+          verbs:
+          - create
+        - apiGroups:
+          - authorization.k8s.io
+          resources:
+          - subjectaccessreviews
+          verbs:
+          - create
+        serviceAccountName: nri-plugins-operator-controller-manager
+      deployments:
+      - label:
+          app.kubernetes.io/component: manager
+          app.kubernetes.io/created-by: nri-plugins-operator
+          app.kubernetes.io/instance: controller-manager
+          app.kubernetes.io/managed-by: kustomize
+          app.kubernetes.io/name: deployment
+          app.kubernetes.io/part-of: nri-plugins-operator
+          control-plane: controller-manager
+        name: nri-plugins-operator-controller-manager
+        spec:
+          replicas: 1
+          selector:
+            matchLabels:
+              control-plane: controller-manager
+          strategy: {}
+          template:
+            metadata:
+              annotations:
+                kubectl.kubernetes.io/default-container: manager
+              labels:
+                control-plane: controller-manager
+            spec:
+              affinity:
+                nodeAffinity:
+                  requiredDuringSchedulingIgnoredDuringExecution:
+                    nodeSelectorTerms:
+                    - matchExpressions:
+                      - key: kubernetes.io/arch
+                        operator: In
+                        values:
+                        - amd64
+                        - arm64
+                        - ppc64le
+                        - s390x
+                      - key: kubernetes.io/os
+                        operator: In
+                        values:
+                        - linux
+              containers:
+              - args:
+                - --secure-listen-address=0.0.0.0:8443
+                - --upstream=http://127.0.0.1:8080/
+                - --logtostderr=true
+                - --v=0
+                image: gcr.io/kubebuilder/kube-rbac-proxy:v0.13.1
+                name: kube-rbac-proxy
+                ports:
+                - containerPort: 8443
+                  name: https
+                  protocol: TCP
+                resources:
+                  limits:
+                    cpu: 500m
+                    memory: 128Mi
+                  requests:
+                    cpu: 5m
+                    memory: 64Mi
+                securityContext:
+                  allowPrivilegeEscalation: false
+                  capabilities:
+                    drop:
+                    - ALL
+              - args:
+                - --health-probe-bind-address=:6789
+                - --metrics-bind-address=127.0.0.1:8080
+                - --leader-elect
+                - --leader-election-id=nri-plugins-operator
+                env:
+                - name: ANSIBLE_GATHERING
+                  value: explicit
+                image: ghcr.io/containers/nri-plugins-operator:unstable
+                livenessProbe:
+                  httpGet:
+                    path: /healthz
+                    port: 6789
+                  initialDelaySeconds: 15
+                  periodSeconds: 20
+                name: manager
+                readinessProbe:
+                  httpGet:
+                    path: /readyz
+                    port: 6789
+                  initialDelaySeconds: 5
+                  periodSeconds: 10
+                resources:
+                  limits:
+                    cpu: 500m
+                    memory: 768Mi
+                  requests:
+                    cpu: 10m
+                    memory: 256Mi
+                securityContext:
+                  allowPrivilegeEscalation: false
+                  capabilities:
+                    drop:
+                    - ALL
+              securityContext:
+                runAsNonRoot: true
+              serviceAccountName: nri-plugins-operator-controller-manager
+              terminationGracePeriodSeconds: 10
+      permissions:
+      - rules:
+        - apiGroups:
+          - ""
+          resources:
+          - configmaps
+          verbs:
+          - get
+          - list
+          - watch
+          - create
+          - update
+          - patch
+          - delete
+        - apiGroups:
+          - coordination.k8s.io
+          resources:
+          - leases
+          verbs:
+          - get
+          - list
+          - watch
+          - create
+          - update
+          - patch
+          - delete
+        - apiGroups:
+          - ""
+          resources:
+          - events
+          verbs:
+          - create
+          - patch
+        serviceAccountName: nri-plugins-operator-controller-manager
+    strategy: deployment
+  installModes:
+  - supported: false
+    type: OwnNamespace
+  - supported: false
+    type: SingleNamespace
+  - supported: false
+    type: MultiNamespace
+  - supported: true
+    type: AllNamespaces
+  keywords:
+  - nri-plugins
+  - nri
+  - cri-o
+  - containerd
+  - kubernetes
+  links:
+  - name: Nri Plugins Operator
+    url: https://nri-plugins-operator.domain
+  maintainers:
+  - email: feruzjon.muyassarov@intel.com
+    name: fmuyassarov
+  maturity: alpha
+  provider:
+    name: nri-plugins maintainers
+    url: https://github.com/fmuyassarov/nri-plugins-operator
+  version: 0.0.1

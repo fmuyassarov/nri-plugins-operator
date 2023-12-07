@@ -1,0 +1,47 @@
+apiVersion: operators.coreos.com/v1alpha1
+kind: ClusterServiceVersion
+metadata:
+  annotations:
+    alm-examples: '[]'
+    capabilities: Basic Install
+  name: nri-plugins-operator.v0.0.0
+  namespace: placeholder
+spec:
+  apiservicedefinitions: {}
+  customresourcedefinitions: {}
+  description: The nri-plugins-operator deploys community maintained nri-plugins into
+    a Kubernetes cluster
+  displayName: nri-plugins-operator
+  icon:
+  - base64data: ""
+    mediatype: ""
+  install:
+    spec:
+      deployments: null
+    strategy: ""
+  installModes:
+  - supported: false
+    type: OwnNamespace
+  - supported: false
+    type: SingleNamespace
+  - supported: false
+    type: MultiNamespace
+  - supported: true
+    type: AllNamespaces
+  keywords:
+  - nri-plugins
+  - nri
+  - cri-o
+  - containerd
+  - kubernetes
+  links:
+  - name: Nri Plugins Operator
+    url: https://nri-plugins-operator.domain
+  maintainers:
+  - email: feruzjon.muyassarov@intel.com
+    name: fmuyassarov
+  maturity: alpha
+  provider:
+    name: nri-plugins maintainers
+    url: https://github.com/fmuyassarov/nri-plugins-operator
+  version: 0.0.0
