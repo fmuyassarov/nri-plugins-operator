@@ -33,6 +33,6 @@ relatedImages:
   name: ""
 - image: gcr.io/kubebuilder/kube-rbac-proxy:v0.13.1
   name: ""
-- image: ghcr.io/containers/nri-plugins-operator:unstable
+- image: fmuyassarov/nri-plugins-operator:unstable
   name: ""
 schema: olm.bundle
