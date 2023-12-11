@@ -51,7 +51,7 @@ endif
 OPERATOR_SDK_VERSION ?= v1.32.0
 
 # Image URL to use all building/pushing image targets
-IMG ?= ghcr.io/containers/nri-plugins-operator:unstable
+IMG ?= docker.io/fmuyassarov/nri-plugins-operator:unstable
 
 .PHONY: all
 all: docker-build
